@@ -33,5 +33,6 @@ int main() {
 	mindfa.makeMinimalDfa();
 
 
+
 	return 0;
 }

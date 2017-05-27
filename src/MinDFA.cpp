@@ -196,10 +196,10 @@ void MinDFA::makeMinimalDfa(){
 	this->_minInitialState = this->_initialState;
 	for(int i = 0; i != state_pairs.size(); i++){
 		if(state_pairs[i].first == this->_initialState){
-			this->_minInitialState = this->_minInitialState + state_pairs[i].second;
+			this->_minInitialState = this->_minInitialState + "," + state_pairs[i].second;
 		}
 		else if(state_pairs[i].second == this->_initialState){
-			this->_minInitialState = this->_minInitialState + state_pairs[i].first;
+			this->_minInitialState = this->_minInitialState + "," + state_pairs[i].first;
 		}
 	}
 
@@ -217,10 +217,10 @@ void MinDFA::makeMinimalDfa(){
 				string tmp = this->_finalStates[i];
 				for(int j = 0; j != state_pairs.size(); j++){
 					if(state_pairs[j].first == this->_finalStates[i]){
-						tmp += state_pairs[j].second;
+						tmp = tmp + "," + state_pairs[j].second;
 					}
 					else if(state_pairs[j].second == this->_finalStates[i]){
-						tmp += state_pairs[j].first;
+						tmp = tmp + "," + state_pairs[j].first;
 					}
 				}
 				this->_minFinalStates.push_back(tmp);
@@ -244,13 +244,43 @@ void MinDFA::makeMinimalDfa(){
 				string tmp = this->_states[i];
 				for(int j = 0; j != state_pairs.size(); j++){
 					if(state_pairs[j].first == this->_states[i]){
-						tmp += state_pairs[j].second;
+						tmp = tmp + "," + state_pairs[j].second;
 					}
 					else if(state_pairs[j].second == this->_states[i]){
-						tmp += state_pairs[j].first;
+						tmp = state_pairs[j].first;
+					}
+				}
+				this->_minStates.push_back(tmp);
+			}
+		}
+	}
+
+	//min dfa transitions
+	for(int i = 0; i != this->_minStates.size(); i++){
+		vector<string> tmp = this->split(this->_minStates[i], ',');
+		for(int j = 0; j != this->_terminals.size(); j++){
+			string temp;
+			for(int k = 0; k != tmp.size(); k++){
+				for(int l = 0; l != this->_transitionFunctions.size(); l++){
+					if((this->_transitionFunctions[l][0] == tmp[k]) && (this->_transitionFunctions[l][1] == this->_terminals[j])){
+						string tmp1 = this->_transitionFunctions[l][2];
+						for(int m = 0; m != this->_minStates.size(); m++){
+							if(this->_minStates[m].find(this->_transitionFunctions[l][2]) != string::npos){
+								tmp1 = this->_minStates[m];
+								break;
+							}
+						}
+						if(!(temp.find(tmp1) != string::npos)){
+							if(temp.empty()){
+								temp += tmp1;
+							}else{
+								temp = temp + "," + tmp1;
+							}
+						}
 					}
 				}
 			}
+			this->_minTransitionFunctions.push_back(vector<string> {this->_minStates[i], this->_terminals[j], temp});
 		}
 	}
 
@@ -287,5 +317,9 @@ void MinDFA::makeMinimalDfa(){
 	for(int i = 0 ; i != this->_minStates.size(); i++)
 		cout << this->_minStates[i] << "\t";
 	cout << endl;
+
+	cout << endl << "Min Transition Functions:  " << endl;
+	for(int i = 0; i != this->_minTransitionFunctions.size(); i++)
+		cout << this->_minTransitionFunctions[i][0] << ":" << this->_minTransitionFunctions[i][1] << ":" << this->_minTransitionFunctions[i][2] << endl;
 
 }
